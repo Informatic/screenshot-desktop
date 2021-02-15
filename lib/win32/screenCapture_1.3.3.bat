@@ -32,7 +32,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Collections.Generic;
 using Microsoft.VisualBasic;
-
+using System.Windows.Forms;
 
 
 /// Provides functions to capture the entire screen, or a particular window, and save it to a file.
@@ -63,7 +63,23 @@ public class ScreenCapture
             }
             Console.WriteLine("Unable to capture image... using main display");
         }
-        return CaptureWindow(User32.GetDesktopWindow());
+
+        // Determine the size of the "virtual screen", which includes all monitors.
+        int screenLeft   = SystemInformation.VirtualScreen.Left;
+        int screenTop    = SystemInformation.VirtualScreen.Top;
+        int screenWidth  = SystemInformation.VirtualScreen.Width;
+        int screenHeight = SystemInformation.VirtualScreen.Height;
+
+        // Create a bitmap of the appropriate size to receive the screenshot.
+        Bitmap bmp = new Bitmap(screenWidth, screenHeight);
+
+        // Draw the screenshot into our bitmap.
+        using (Graphics g = Graphics.FromImage(bmp))
+        {
+            g.CopyFromScreen(screenLeft, screenTop, 0, 0, bmp.Size);
+        }
+
+        return bmp;
     }
 
     /// Creates an Image object containing a screen shot of a specific window
